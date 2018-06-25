@@ -219,10 +219,11 @@ public class MainActivity extends AppCompatActivity implements Animator.Animator
             infoModel.setVersion(version);
             infoModel.setIcon(icon);
             infoModel.setInstalled(isAvilible(this, packageName));
-            if ( list == null )
+            if ( list == null ) {
                 mApps.add(infoModel);
-            else
+            } else {
                 list.add(infoModel);
+            }
         }
     }
 
@@ -276,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements Animator.Animator
     @Subscribe( thread = EventThread.IO, tags = {@Tag( Constants.RxBusEventType.LOAD_BOOK_LIST )} )
     public void loadAppList(Integer type) {
         Timber.d("loadAppList:" + Thread.currentThread().getName());
-        List<InfoModel> listArr = new ArrayList<>();
+        final List<InfoModel> listArr = new ArrayList<>();
         File dir = Constants.DIR;
         if ( dir.exists() && dir.isDirectory() ) {
             File[] fileNames = dir.listFiles();
@@ -286,12 +287,16 @@ public class MainActivity extends AppCompatActivity implements Animator.Animator
                 }
             }
         }
-        runOnUiThread(() -> {
-            mSwipeRefreshLayout.setRefreshing(false);
-            mApps.clear();
-            mApps.addAll(listArr);
-            mAppshelfAdapter.notifyDataSetChanged();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(false);
+                mApps.clear();
+                mApps.addAll(listArr);
+                mAppshelfAdapter.notifyDataSetChanged();
+            }
         });
+
     }
 
     public String getApplicationName(String packageName) {
@@ -369,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements Animator.Animator
         public void onBindViewHolder(final RecyclerView.ViewHolder holder1, int position) {
             if ( holder1 instanceof MyViewHolder ) {
                 MyViewHolder holder = ( MyViewHolder ) holder1;
-                InfoModel infoModel = mApps.get(position);
+                final InfoModel infoModel = mApps.get(position);
                 holder.mTvAppName.setText(infoModel.getName() + "(v" + infoModel.getVersion() + ")");
 
 //            holder.mTvAppInstall.setText(infoModel.getName());
